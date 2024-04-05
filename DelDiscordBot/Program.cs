@@ -1,4 +1,5 @@
-﻿using DelDiscordBot.config;
+﻿using DelDiscordBot.commands;
+using DelDiscordBot.config;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
@@ -37,12 +38,24 @@ namespace DelDiscordBot
             Client = new DiscordClient(discordConfig);
             Client.Ready += Client_Ready; //It's adding an event handler for the Discord client's Ready event.
 
+                var commandsConfig = new CommandsNextConfiguration()
+                {
+                    StringPrefixes = new String[] {JsonReader.prefix},
+                    EnableMentionPrefix = true,
+                    EnableDms = true,
+                    EnableDefaultHelp = false,
+                };
+
+             CommandsNextExtension Commands = Client.UseCommandsNext(commandsConfig);
+             Commands.RegisterCommands<TextCommands>();
+
             await Client.ConnectAsync();
             await Task.Delay(-1);
             }
             catch(Exception ex)
             {
                 throw ex;
+                Console.WriteLine(ex.ToString(), "Connection Error!");
             }
         }
 
