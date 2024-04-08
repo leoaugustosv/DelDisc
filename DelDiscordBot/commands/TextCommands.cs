@@ -12,6 +12,8 @@ namespace DelDiscordBot.commands
 {
     internal class TextCommands : BaseCommandModule
     {
+        private static HashSet<ulong> usersWhoExecutedSCommand = new HashSet<ulong>();
+
         [Command("C")]
         [Description("Clears all messages in the current channel.")]
         public async Task Clear(CommandContext ctx)
@@ -108,23 +110,50 @@ namespace DelDiscordBot.commands
 
         [Command("R")]
         [Description("Delete and create a new channel with the same name, in the same category.")]
-        public async Task RecreateChannel(CommandContext ctx, int quantity = 20)
-        {
+        public async Task RecreateChannel(CommandContext ctx, String channelName, String categoryName, String channelType)
+        {       
+         //  Check if channel is in a category
+   //       var category = ctx.Guild.Channels.cache.find(c => c.type == "category" && c.name == categoryName);
 
-            // TO-DO: Check if channel is in a category; if true, get category
+       //    if (!category)
+          {
+               await ctx.RespondAsync("Category was not found!");
+               return;
+           }
 
-
-            // Delete channel
+            //Delete channel
             await ctx.Channel.DeleteAsync();
-
 
             // TO-DO: Create a channel with the same name, in the same category
 
         }
+        [Command("S")]
+        [Description("Task to delete messages everyday at 11:45pm")]
+        public async Task ScheduleDelete(CommandContext ctx)
+        {
+            var horaAtual = DateTime.Now;
+            var horaAgendada = new TimeSpan(11, 45, 0);
 
+            if (usersWhoExecutedSCommand.Contains(ctx.User.Id))
+            {
+                await ctx.RespondAsync("You have already run this command. Messages will be deleted as scheduled.");
+                return;
+            }
 
+            // Add in the colletion hashset the user as having executed the command
+            usersWhoExecutedSCommand.Add(ctx.User.Id);
+        
 
-
+            if (horaAtual.Hour == horaAgendada.Hours && horaAtual.Minute == horaAgendada.Minutes)
+            {
+                await ctx.RespondAsync("Messages will be deleted at the scheduled time, 11:45 pm!");
+                await Task.Delay(1000);
+                await Clear(ctx);
+            }  else
+            {
+                await ctx.RespondAsync("Messages will be deleted at the scheduled time, 11:45 pm!");
+            }
+        }
     }
-
-}
+} 
+  
